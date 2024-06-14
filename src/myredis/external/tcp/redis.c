@@ -2,6 +2,6 @@
 
 #include "../../adapters/interfaces.h"
 
-char* send_command(char* command) {
+char* send_command(char command[]) {
     return command;
 }
