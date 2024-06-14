@@ -23,7 +23,9 @@ char* echo_redis(char str[]) {
         str_len,
         str
     );
-    return send_command(command);
+    auto response = send_command(command);
+    free(command);
+    return response;
 }
 
 char* get_redis(char key[]) {
@@ -39,7 +41,9 @@ char* get_redis(char key[]) {
         key_len,
         key
     );
-    return send_command(command);
+    auto response = send_command(command);
+    free(command);
+    return response;
 }
 
 char* set_redis(char key[], char value[]) {
@@ -60,5 +64,7 @@ char* set_redis(char key[], char value[]) {
         value_len,
         value
     );
-    return send_command(command);
+    auto response = send_command(command);
+    free(command);
+    return response;
 }
