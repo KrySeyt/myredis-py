@@ -4,3 +4,5 @@
 #endif //REDIS_H
 
 char* ping_redis();
+
+char* echo_redis(char str[]);

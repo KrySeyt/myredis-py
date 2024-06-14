@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-#include "redis.h"
+#include "../../adapters/interfaces.h"
 
 char* send_command(char* command) {
-    return "+PONG\r\n";
+    return command;
 }
