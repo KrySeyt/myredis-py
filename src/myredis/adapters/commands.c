@@ -1,5 +1,5 @@
-#include "../application/redis.h"
-#include "./interfaces.h"
+#include "../application/interfaces/redis.h"
+#include "./interfaces/redis.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,7 +23,7 @@ char* echo_redis(char str[]) {
         str_len,
         str
     );
-    auto response = send_command(command);
+    char *response = send_command(command);
     free(command);
     return response;
 }
@@ -41,7 +41,7 @@ char* get_redis(char key[]) {
         key_len,
         key
     );
-    auto response = send_command(command);
+    char *response = send_command(command);
     free(command);
     return response;
 }
@@ -64,7 +64,7 @@ char* set_redis(char key[], char value[]) {
         value_len,
         value
     );
-    auto response = send_command(command);
+    char *response = send_command(command);
     free(command);
     return response;
 }

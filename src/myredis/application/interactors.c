@@ -1,4 +1,4 @@
-#include "redis.h"
+#include "./interfaces/redis.h"
 
 char* ping_interactor() {
     return ping_redis();

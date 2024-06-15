@@ -1,6 +1,4 @@
-#include <stdio.h>
-
-#include "../../adapters/interfaces.h"
+#include "../../adapters/interfaces/redis.h"
 
 char* send_command(char command[]) {
     return command;
