@@ -6,7 +6,7 @@
 #include <string.h>
 
 char* ping_redis() {
-    char command[] = "+PING\r\n";
+    char command[] = "*1\r\n$4\r\nPING\r\n";
     return send_command(command);
 }
 
