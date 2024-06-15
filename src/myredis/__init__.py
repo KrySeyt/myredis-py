@@ -23,8 +23,12 @@ class Redis:
         print(response.decode("utf-8"))
 
     def set(self, key: str, value: str) -> None:
-        response = self._c_lib.set(key.encode("utf-8"), value.encode("utf-8"))
-        print(response.decode("utf-8"))
+        response = self._c_lib.set(
+            key.encode("utf-8"),
+            value.encode("utf-8")
+        )
+
+        return response.decode("utf-8")
 
     def echo(self, value: str) -> str:
         response = self._c_lib.echo(value.encode("utf-8"))
