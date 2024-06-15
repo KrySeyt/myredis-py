@@ -50,8 +50,9 @@ char* send_command(char command[]) {
     }
 
     printf("Server response: %s\n", response);
+
     shutdown(socket_desc, SHUT_RDWR);
     close(socket_desc);
 
-    return "";
+    return response;
 }

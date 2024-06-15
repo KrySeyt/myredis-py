@@ -19,8 +19,11 @@ class Redis:
         self._c_lib.set.restype = ctypes.c_char_p
 
     def get(self, key: str) -> Any:
-        response = self._c_lib.get(key.encode("utf-8"))
-        print(response.decode("utf-8"))
+        response = self._c_lib.get(
+            key.encode("utf-8")
+        )
+
+        return response.decode("utf-8")
 
     def set(self, key: str, value: str) -> None:
         response = self._c_lib.set(
