@@ -4,14 +4,65 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
-#include <unistd.h> // read(), write(), close()
+#include <unistd.h>
 
 #include "../../adapters/interfaces/redis.h"
 
-#include <string.h>
-
 static char host[] = "127.0.0.1";
 static int port = 6379;
+
+void print(char str[]) {
+    for (; *str != '\0'; str++) {
+        if (*str == '\n') {
+            putchar('\\');
+            putchar('n');
+        }
+
+        else if (*str == '\r') {
+            putchar('\\');
+            putchar('r');
+        }
+        else {
+            putchar(*str);
+        }
+    }
+
+    putchar('\n');
+}
+
+char* read_from_socket(int socket_desc) {
+    char *response = malloc(2000); // TODO: mb memory leak
+    int received_bytes = recv(socket_desc, response, 2000, 0);
+
+    if (!received_bytes)
+        return "";
+
+    char *curr;
+    switch (response[0]) {
+        case '+': case ':':
+            curr = response + received_bytes - 1;
+            while (*curr != '\n') {
+                curr += recv(socket_desc, curr, 2000, 0);
+            }
+            *(++curr) = '\0';
+
+            return response;
+
+        case '$':
+            curr = response + received_bytes - 1;
+            while (*curr != '\n' && curr - response < 2 && (curr - response) < (response[1] - '0' + 6) ) {
+                curr += recv(socket_desc, curr, 2000, 0);
+            }
+            *(++curr) = '\0';
+
+            return response;
+
+        default:
+            printf("Unknown server response: %s\n", response);
+            exit(1);
+    }
+
+}
 
 char* send_command(char command[]) {
     int socket_desc = socket(AF_INET, SOCK_STREAM, 0);
@@ -32,8 +83,6 @@ char* send_command(char command[]) {
         exit(1);
     }
 
-    printf("Connected with server successfully\n");
-    printf("CMD:\n%s\n", command);
     int r = send(socket_desc, command, strlen(command), 0);
 
     if (r < 0) {
@@ -41,15 +90,7 @@ char* send_command(char command[]) {
         exit(1);
     }
 
-    char *response = malloc(1000);
-    r = recv(socket_desc, response, sizeof(response), 0);
-
-    if (r < 0) {
-        printf("Error while receiving server response");
-        exit(1);
-    }
-
-    printf("Server response: %s\n", response);
+    char *response = read_from_socket(socket_desc);
 
     shutdown(socket_desc, SHUT_RDWR);
     close(socket_desc);
