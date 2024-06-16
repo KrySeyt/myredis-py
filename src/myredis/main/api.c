@@ -2,9 +2,10 @@
 #include "../application/interactors.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 
-void print(char str[]) {
+static void print(char str[]) {
     for (; *str != '\0'; str++) {
         if (*str == '\n') {
             putchar('\\');
@@ -29,9 +30,7 @@ char* ping() {
 }
 
 char* echo(char str[]) {
-    char *v = echo_interactor(str);
-    print(v);
-    return v;
+    return echo_interactor(str);
 }
 
 char* get(char key[]) {
