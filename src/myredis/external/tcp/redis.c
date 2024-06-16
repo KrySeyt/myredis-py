@@ -9,29 +9,7 @@
 #include "../../adapters/interfaces/redis.h"
 #include "../../adapters/response_parser.h"
 
-static char host[] = "127.0.0.1";
-static int port = 6379;
-
-// void print(char str[]) {
-//     for (; *str != '\0'; str++) {
-//         if (*str == '\n') {
-//             putchar('\\');
-//             putchar('n');
-//         }
-//
-//         else if (*str == '\r') {
-//             putchar('\\');
-//             putchar('r');
-//         }
-//         else {
-//             putchar(*str);
-//         }
-//     }
-//
-//     putchar('\n');
-// }
-
-char* read_from_socket(int socket_desc) {
+static char* read_from_socket(int socket_desc) {
     char *response = malloc(2000); // TODO: mb memory leak
     int received_bytes = recv(socket_desc, response, 2000, 0);
 
@@ -67,6 +45,9 @@ char* read_from_socket(int socket_desc) {
 }
 
 char* send_command(char command[]) {
+    extern char *redis_server_host;
+    extern int redis_server_port;
+
     int socket_desc = socket(AF_INET, SOCK_STREAM, 0);
 
     if (socket_desc < 0) {
@@ -77,8 +58,8 @@ char* send_command(char command[]) {
     struct sockaddr_in server_addr;
 
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(port);
-    server_addr.sin_addr.s_addr = inet_addr(host);
+    server_addr.sin_port = htons(redis_server_port);
+    server_addr.sin_addr.s_addr = inet_addr(redis_server_host);
 
     if(connect(socket_desc, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0){
         printf("Unable to connect\n");

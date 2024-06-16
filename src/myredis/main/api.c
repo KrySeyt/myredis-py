@@ -1,4 +1,3 @@
-#include "api.h"
 #include "../application/interactors.h"
 
 #include <stdio.h>
@@ -25,18 +24,35 @@ static void print(char str[]) {
 }
 
 
-char* ping() {
+char *redis_server_host;
+int redis_server_port;
+
+
+char* ping(char host[], const int port) {
+    printf("%c\n", 49);
+    redis_server_host = host;
+    redis_server_port = port;
+
     return ping_interactor();
 }
 
-char* echo(char str[]) {
+char* echo(char host[], const int port, char str[]) {
+    redis_server_host = host;
+    redis_server_port = port;
+
     return echo_interactor(str);
 }
 
-char* get(char key[]) {
+char* get(char host[], const int port, char key[]) {
+    redis_server_host = host;
+    redis_server_port = port;
+
     return get_interactor(key);
 }
 
-char* set(char key[], char value[]) {
+char* set(char host[], const int port, char key[], char value[]) {
+    redis_server_host = host;
+    redis_server_port = port;
+
     return set_interactor(key, value);
 }
