@@ -1,4 +1,6 @@
 #include "../application/interactors.h"
+#include "../external/tcp/redis.h"
+#include "api.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,35 +26,39 @@ static void print(char str[]) {
 }
 
 
-char *redis_server_host;
-int redis_server_port;
+int redis_server_socket_desc;
 
 
-char* ping(char host[], const int port) {
-    printf("%c\n", 49);
-    redis_server_host = host;
-    redis_server_port = port;
+int connect_to_redis_server(char host[], const int port) {
+    return connect_(host, port);
+}
+
+
+void disconnect_from_redis_server(const int socket_desc) {
+    close_connection(socket_desc);
+}
+
+
+char* ping(const int socket_desc) {
+    redis_server_socket_desc = socket_desc;
 
     return ping_interactor();
 }
 
-char* echo(char host[], const int port, char str[]) {
-    redis_server_host = host;
-    redis_server_port = port;
+char* echo(const int socket_desc, char str[]) {
+    redis_server_socket_desc = socket_desc;
 
     return echo_interactor(str);
 }
 
-char* get(char host[], const int port, char key[]) {
-    redis_server_host = host;
-    redis_server_port = port;
+char* get(const int socket_desc, char key[]) {
+    redis_server_socket_desc = socket_desc;
 
     return get_interactor(key);
 }
 
-char* set(char host[], const int port, char key[], char value[]) {
-    redis_server_host = host;
-    redis_server_port = port;
+char* set(const int socket_desc, char key[], char value[]) {
+    redis_server_socket_desc = socket_desc;
 
     return set_interactor(key, value);
 }

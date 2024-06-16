@@ -44,10 +44,7 @@ static char* read_from_socket(int socket_desc) {
 
 }
 
-char* send_command(char command[]) {
-    extern char *redis_server_host;
-    extern int redis_server_port;
-
+int connect_(char redis_server_host[], const int redis_server_port) {
     int socket_desc = socket(AF_INET, SOCK_STREAM, 0);
 
     if (socket_desc < 0) {
@@ -66,17 +63,25 @@ char* send_command(char command[]) {
         exit(1);
     }
 
-    int r = send(socket_desc, command, strlen(command), 0);
+    return socket_desc;
+}
+
+void close_connection(const int socket_desc) {
+    shutdown(socket_desc, SHUT_RDWR);
+    close(socket_desc);
+}
+
+char* send_command(char command[]) {
+    extern int redis_server_socket_desc;
+
+    int r = send(redis_server_socket_desc, command, strlen(command), 0);
 
     if (r < 0) {
         printf("Unable to send cmd");
         exit(1);
     }
 
-    char *response = read_from_socket(socket_desc);
-
-    shutdown(socket_desc, SHUT_RDWR);
-    close(socket_desc);
+    char *response = read_from_socket(redis_server_socket_desc);
 
     return parse_response(response);
 }
