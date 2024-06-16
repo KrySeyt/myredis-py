@@ -19,4 +19,6 @@ char* get(const int socket_desc, char key[]);
 
 char* set(const int socket_desc, char key[], char value[], const int lifetime);
 
+int wait(const int socket_desc, const int replicas_count, const int timeout);
+
 #endif //API_H

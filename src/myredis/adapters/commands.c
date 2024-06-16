@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <tgmath.h>
+#include <time.h>
 
 char* ping_redis() {
     char command[] = "*1\r\n$4\r\nPING\r\n";
@@ -71,7 +72,7 @@ char* set_redis(char key[], char value[], const int lifetime) {
     else
         sprintf(
             command,
-            "*3\r\n"
+            "*5\r\n"
             "$3\r\n"
             "SET\r\n"
             "$%d\r\n"
@@ -93,4 +94,25 @@ char* set_redis(char key[], char value[], const int lifetime) {
     char *response = send_command(command);
     free(command);
     return response;
+}
+
+int wait_redis(const int replicas_count, const int timeout) {
+    char* command = malloc(300);
+    sprintf(
+        command,
+        "*3\r\n"
+        "$4\r\n"
+        "WAIT\r\n"
+        "$%d\r\n"
+        "%d\r\n"
+        "$%d\r\n"
+        "%d\r\n",
+        (int) log10(abs(replicas_count)) + 1,
+        replicas_count,
+        (int) log10(abs(timeout)) + 1,
+        timeout
+    );
+    char *response = send_command(command);
+    free(command);
+    return atoi(response);
 }

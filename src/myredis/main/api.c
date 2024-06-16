@@ -59,3 +59,8 @@ char* set(const int socket_desc, char key[], char value[], const int lifetime) {
 
     return set_interactor(key, value, lifetime);
 }
+
+int wait(const int socket_desc, const int replicas_count, const int timeout) {
+    redis_server_socket_desc = socket_desc;
+    return wait_interactor(replicas_count, timeout);
+}

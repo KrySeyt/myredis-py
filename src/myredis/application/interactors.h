@@ -9,4 +9,6 @@ char* get_interactor(char key[]);
 
 char* set_interactor(char key[], char value[], const int lifetime);
 
+int wait_interactor(const int replicas_count, const int timeout);
+
 #endif //INTERACTORS_H

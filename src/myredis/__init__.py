@@ -19,6 +19,7 @@ class Redis:
         self._c_lib.echo.restype = ctypes.c_char_p
         self._c_lib.get.restype = ctypes.c_char_p
         self._c_lib.set.restype = ctypes.c_char_p
+        self._c_lib.wait.restype = ctypes.c_int
         self._c_lib.connect_to_redis_server.restype = ctypes.c_int
 
         self._redis_server_socket_descriptor = self._connect()
@@ -51,6 +52,13 @@ class Redis:
     def ping(self) -> None:
         self._c_lib.ping(
             self._redis_server_socket_descriptor,
+        )
+
+    def wait(self, replicas_count: int, timeout: Seconds) -> None:
+        return self._c_lib.wait(
+            self._redis_server_socket_descriptor,
+            replicas_count,
+            timeout * 1000,
         )
 
     def close(self) -> None:
