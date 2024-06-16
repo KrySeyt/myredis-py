@@ -7,28 +7,29 @@
 #include <unistd.h>
 
 #include "../../adapters/interfaces/redis.h"
+#include "../../adapters/response_parser.h"
 
 static char host[] = "127.0.0.1";
 static int port = 6379;
 
-void print(char str[]) {
-    for (; *str != '\0'; str++) {
-        if (*str == '\n') {
-            putchar('\\');
-            putchar('n');
-        }
-
-        else if (*str == '\r') {
-            putchar('\\');
-            putchar('r');
-        }
-        else {
-            putchar(*str);
-        }
-    }
-
-    putchar('\n');
-}
+// void print(char str[]) {
+//     for (; *str != '\0'; str++) {
+//         if (*str == '\n') {
+//             putchar('\\');
+//             putchar('n');
+//         }
+//
+//         else if (*str == '\r') {
+//             putchar('\\');
+//             putchar('r');
+//         }
+//         else {
+//             putchar(*str);
+//         }
+//     }
+//
+//     putchar('\n');
+// }
 
 char* read_from_socket(int socket_desc) {
     char *response = malloc(2000); // TODO: mb memory leak
@@ -50,9 +51,10 @@ char* read_from_socket(int socket_desc) {
 
         case '$':
             curr = response + received_bytes - 1;
-            while (*curr != '\n' && curr - response < 2 && (curr - response) < (response[1] - '0' + 6) ) {
+            while ((curr - response + 1) < (atoi(response + 1) + 6) ) {
                 curr += recv(socket_desc, curr, 2000, 0);
             }
+
             *(++curr) = '\0';
 
             return response;
@@ -95,5 +97,5 @@ char* send_command(char command[]) {
     shutdown(socket_desc, SHUT_RDWR);
     close(socket_desc);
 
-    return response;
+    return parse_response(response);
 }

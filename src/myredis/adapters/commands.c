@@ -1,5 +1,6 @@
 #include "../application/interfaces/redis.h"
 #include "./interfaces/redis.h"
+#include "../adapters/response_parser.h"
 
 #include <stdio.h>
 #include <stdlib.h>
