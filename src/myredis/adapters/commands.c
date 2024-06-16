@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <tgmath.h>
 
 char* ping_redis() {
     char command[] = "*1\r\n$4\r\nPING\r\n";
@@ -47,24 +48,48 @@ char* get_redis(char key[]) {
     return response;
 }
 
-char* set_redis(char key[], char value[]) {
+char* set_redis(char key[], char value[], const int lifetime) {
     const int key_len = strlen(key);
     const int value_len = strlen(value);
     char* command = malloc(key_len + value_len + 30);
-    sprintf(
-        command,
-        "*3\r\n"
-        "$3\r\n"
-        "SET\r\n"
-        "$%d\r\n"
-        "%s\r\n"
-        "$%d\r\n"
-        "%s\r\n",
-        key_len,
-        key,
-        value_len,
-        value
-    );
+
+    if (lifetime == -1)
+        sprintf(
+            command,
+            "*3\r\n"
+            "$3\r\n"
+            "SET\r\n"
+            "$%d\r\n"
+            "%s\r\n"
+            "$%d\r\n"
+            "%s\r\n",
+            key_len,
+            key,
+            value_len,
+            value
+        );
+    else
+        sprintf(
+            command,
+            "*3\r\n"
+            "$3\r\n"
+            "SET\r\n"
+            "$%d\r\n"
+            "%s\r\n"
+            "$%d\r\n"
+            "%s\r\n"
+            "$2\r\n"
+            "PX\r\n"
+            "$%d\r\n"
+            "%d\r\n",
+            key_len,
+            key,
+            value_len,
+            value,
+            (int) log10(abs(lifetime)) + 1,
+            lifetime
+        );
+
     char *response = send_command(command);
     free(command);
     return response;

@@ -17,6 +17,6 @@ char* echo(const int socket_desc, char str[]);
 
 char* get(const int socket_desc, char key[]);
 
-char* set(const int socket_desc, char key[], char value[]);
+char* set(const int socket_desc, char key[], char value[], const int lifetime);
 
 #endif //API_H

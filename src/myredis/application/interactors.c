@@ -12,6 +12,6 @@ char* get_interactor(char key[]) {
     return get_redis(key);
 }
 
-char* set_interactor(char key[], char value[]) {
-    return set_redis(key, value);
+char* set_interactor(char key[], char value[], const int lifetime) {
+    return set_redis(key, value, lifetime);
 }

@@ -7,6 +7,6 @@ char* echo_redis(char str[]);
 
 char* get_redis(char key[]);
 
-char* set_redis(char key[], char value[]);
+char* set_redis(char key[], char value[], const int lifetime);
 
 #endif //REDIS_H

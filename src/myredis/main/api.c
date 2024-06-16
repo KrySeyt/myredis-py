@@ -54,8 +54,8 @@ char* get(const int socket_desc, char key[]) {
     return get_interactor(key);
 }
 
-char* set(const int socket_desc, char key[], char value[]) {
+char* set(const int socket_desc, char key[], char value[], const int lifetime) {
     redis_server_socket_desc = socket_desc;
 
-    return set_interactor(key, value);
+    return set_interactor(key, value, lifetime);
 }

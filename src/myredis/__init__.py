@@ -5,6 +5,8 @@ __all__ = (
 import ctypes
 from typing import Self
 
+Seconds = float
+
 
 class Redis:
     def __init__(self, host: str, port: int = 6379) -> None:
@@ -29,11 +31,12 @@ class Redis:
 
         return response.decode("utf-8") if response else response
 
-    def set(self, key: str, value: str) -> None:
+    def set(self, key: str, value: str, lifetime: Seconds | None = None) -> None:
         response = self._c_lib.set(
             self._redis_server_socket_descriptor,
             key.encode("utf-8"),
             value.encode("utf-8"),
+            lifetime * 1000 if lifetime is not None else -1,
         )
 
         return response.decode("utf-8")
@@ -58,9 +61,8 @@ class Redis:
     def __enter__(self) -> Self:
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self.close()
-        return False
 
     def _connect(self) -> int:
         return self._c_lib.connect_to_redis_server(
