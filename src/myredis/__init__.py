@@ -3,7 +3,7 @@ __all__ = (
 )
 
 import ctypes
-from typing import Any, Self
+from typing import Self
 
 
 class Redis:
@@ -21,13 +21,13 @@ class Redis:
 
         self._redis_server_socket_descriptor = self._connect()
 
-    def get(self, key: str) -> Any:
+    def get(self, key: str) -> str | None:
         response = self._c_lib.get(
             self._redis_server_socket_descriptor,
             key.encode("utf-8"),
         )
 
-        return response.decode("utf-8")
+        return response.decode("utf-8") if response else response
 
     def set(self, key: str, value: str) -> None:
         response = self._c_lib.set(

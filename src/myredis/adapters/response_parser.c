@@ -18,6 +18,10 @@ char* parse_response(char response[]) {
             return parsed_response;
 
         case '$':
+            if (response[1] == '-' && response[2] == '1') {
+                return NULL;
+            }
+
             while (*curr_resp != '\n')
                 curr_resp++;
 

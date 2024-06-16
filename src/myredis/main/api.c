@@ -28,16 +28,13 @@ static void print(char str[]) {
 
 int redis_server_socket_desc;
 
-
 int connect_to_redis_server(char host[], const int port) {
     return connect_(host, port);
 }
 
-
 void disconnect_from_redis_server(const int socket_desc) {
     close_connection(socket_desc);
 }
-
 
 char* ping(const int socket_desc) {
     redis_server_socket_desc = socket_desc;
