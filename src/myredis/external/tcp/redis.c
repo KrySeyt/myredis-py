@@ -5,9 +5,20 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdbool.h>
 
 #include "../../adapters/interfaces/redis.h"
 #include "../../adapters/response_parser.h"
+
+static int substr_count(char base_str[], char target[]) {
+    char *substr_start = strstr(base_str, target);
+
+    if (substr_start == NULL)
+        return 0;
+
+    return 1 + substr_count(substr_start + strlen(target), target);
+
+}
 
 static char* read_from_socket(int socket_desc) {
     char *response = malloc(2000); // TODO: mb memory leak
@@ -33,6 +44,15 @@ static char* read_from_socket(int socket_desc) {
                 curr += recv(socket_desc, curr, 2000, 0);
             }
 
+            *(++curr) = '\0';
+
+            return response;
+
+        case '*':
+            curr = response + received_bytes - 1;
+            while (substr_count(response, "\r\n") != 5) {
+                curr += recv(socket_desc, curr, 2000, 0);
+            }
             *(++curr) = '\0';
 
             return response;

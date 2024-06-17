@@ -116,3 +116,23 @@ int wait_redis(const int replicas_count, const int timeout) {
     free(command);
     return atoi(response);
 }
+
+char* config_get_redis(char key[]) {
+    const int key_len = strlen(key);
+    char* command = malloc(key_len + 30);
+    sprintf(
+        command,
+        "*3\r\n"
+        "$6\r\n"
+        "CONFIG\r\n"
+        "$3\r\n"
+        "GET\r\n"
+        "$%d\r\n"
+        "%s\r\n",
+        key_len,
+        key
+    );
+    char *response = send_command(command);
+    free(command);
+    return response;
+}

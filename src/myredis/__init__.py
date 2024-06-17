@@ -20,6 +20,7 @@ class Redis:
         self._c_lib.get.restype = ctypes.c_char_p
         self._c_lib.set.restype = ctypes.c_char_p
         self._c_lib.wait.restype = ctypes.c_int
+        self._c_lib.config_get.restype = ctypes.c_char_p
         self._c_lib.connect_to_redis_server.restype = ctypes.c_int
 
         self._redis_server_socket_descriptor = self._connect()
@@ -60,6 +61,14 @@ class Redis:
             replicas_count,
             timeout * 1000,
         )
+
+    def config_get(self, key: str) -> str | None:
+        response = self._c_lib.config_get(
+            self._redis_server_socket_descriptor,
+            key.encode("utf-8"),
+        )
+
+        return response.decode("utf-8") if response else response
 
     def close(self) -> None:
         self._c_lib.disconnect_from_redis_server(

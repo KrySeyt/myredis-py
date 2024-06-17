@@ -33,6 +33,23 @@ char* parse_response(char response[]) {
 
             return parsed_response;
 
+        case '*':
+            for (int i = 0; i < 4; i++) {
+                while (*curr_resp != '\n') {
+                    curr_resp++;
+                }
+                curr_resp++;
+            }
+
+
+            while (*curr_resp != '\r') {
+                *(curr_parsed++) = *(curr_resp++);
+            }
+
+            *curr_parsed = '\0';
+
+            return parsed_response;
+
         default:
             printf("%s", response);
             return "";
