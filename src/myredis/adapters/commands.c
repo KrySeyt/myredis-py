@@ -52,7 +52,7 @@ char* get_redis(char key[]) {
 char* set_redis(char key[], char value[], const int lifetime) {
     const int key_len = strlen(key);
     const int value_len = strlen(value);
-    char* command = malloc(key_len + value_len + 30);
+    char* command = malloc(key_len + value_len + 1000);
 
     if (lifetime == -1)
         sprintf(
@@ -119,7 +119,7 @@ int wait_redis(const int replicas_count, const int timeout) {
 
 char* config_get_redis(char key[]) {
     const int key_len = strlen(key);
-    char* command = malloc(key_len + 30);
+    char* command = malloc(key_len + 300);
     sprintf(
         command,
         "*3\r\n"

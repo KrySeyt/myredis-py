@@ -5,7 +5,6 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <unistd.h>
-#include <stdbool.h>
 
 #include "../../adapters/interfaces/redis.h"
 #include "../../adapters/response_parser.h"
