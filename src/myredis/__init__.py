@@ -71,7 +71,7 @@ class Redis:
             self._redis_server_socket_descriptor
         )
 
-    def wait(self, replicas_count: int, timeout: Seconds) -> None:
+    def wait(self, replicas_count: int, timeout: Seconds) -> int:
         self._redis_c_lib.send_wait_request(
             self._redis_server_socket_descriptor,
             replicas_count,
