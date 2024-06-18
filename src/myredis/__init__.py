@@ -25,7 +25,7 @@ class Redis:
         self._redis_server_socket_descriptor = self._connect()
 
     def get(self, key: str) -> str | None:
-        self._redis_c_lib.get(
+        self._redis_c_lib.send_get_request(
             self._redis_server_socket_descriptor,
             key.encode("utf-8"),
         )
@@ -37,7 +37,7 @@ class Redis:
         return response.decode("utf-8") if response else response
 
     def set(self, key: str, value: str, lifetime: Seconds | None = None) -> None:
-        self._redis_c_lib.set(
+        self._redis_c_lib.send_set_request(
             self._redis_server_socket_descriptor,
             key.encode("utf-8"),
             value.encode("utf-8"),
@@ -51,7 +51,7 @@ class Redis:
         return response.decode("utf-8")
 
     def echo(self, value: str) -> str:
-        self._redis_c_lib.echo(
+        self._redis_c_lib.send_echo_request(
             self._redis_server_socket_descriptor,
             value.encode("utf-8"),
         )
@@ -63,7 +63,7 @@ class Redis:
         return response.decode("utf-8")
 
     def ping(self) -> None:
-        self._redis_c_lib.ping(
+        self._redis_c_lib.send_ping_request(
             self._redis_server_socket_descriptor,
         )
 
@@ -72,7 +72,7 @@ class Redis:
         )
 
     def wait(self, replicas_count: int, timeout: Seconds) -> None:
-        self._redis_c_lib.wait(
+        self._redis_c_lib.send_wait_request(
             self._redis_server_socket_descriptor,
             replicas_count,
             timeout * 1000,
@@ -85,7 +85,7 @@ class Redis:
         return int(response)
 
     def config_get(self, key: str) -> str | None:
-        self._redis_c_lib.config_get(
+        self._redis_c_lib.send_config_get_request(
             self._redis_server_socket_descriptor,
             key.encode("utf-8"),
         )
