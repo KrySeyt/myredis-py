@@ -5,7 +5,7 @@
 #ifndef REDIS_H
 #define REDIS_H
 
-int connect_();
+int connect_(char host[], const int port);
 
 void close_connection(const int socket_desc);
 

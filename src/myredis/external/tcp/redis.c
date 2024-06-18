@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include "../../adapters/interfaces/redis.h"
+#include "../../application/interfaces/redis.h"
 #include "../../adapters/response_parser.h"
 
 static int substr_count(char base_str[], char target[]) {
@@ -90,7 +91,7 @@ void close_connection(const int socket_desc) {
     close(socket_desc);
 }
 
-char* send_command(char command[]) {
+void send_command(char command[]) {
     extern int redis_server_socket_desc;
 
     int r = send(redis_server_socket_desc, command, strlen(command), 0);
@@ -99,6 +100,10 @@ char* send_command(char command[]) {
         printf("Unable to send cmd");
         exit(1);
     }
+}
+
+char* get_response_redis(void) {
+    extern int redis_server_socket_desc;
 
     char *response = read_from_socket(redis_server_socket_desc);
 

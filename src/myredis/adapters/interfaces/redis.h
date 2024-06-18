@@ -5,6 +5,6 @@
 #ifndef INTERFACES_H
 #define INTERFACES_H
 
-char* send_command(char* command);
+void send_command(char* command);
 
 #endif //INTERFACES_H

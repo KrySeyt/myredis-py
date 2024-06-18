@@ -1,16 +1,18 @@
 #ifndef REDIS_H
 #define REDIS_H
 
-char* ping_redis();
+void ping_redis();
 
-char* echo_redis(char str[]);
+void echo_redis(char str[]);
 
-char* get_redis(char key[]);
+void get_redis(char key[]);
 
-char* set_redis(char key[], char value[], const int lifetime);
+void set_redis(char key[], char value[], const int lifetime);
 
-int wait_redis(const int replicas_count, const int timeout);
+void wait_redis(const int replicas_count, const int timeout);
 
-char* config_get_redis(char key[]);
+void config_get_redis(char key[]);
+
+char* get_response_redis(void);
 
 #endif //REDIS_H
