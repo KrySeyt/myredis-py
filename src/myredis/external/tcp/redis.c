@@ -8,6 +8,9 @@
 
 #include "../../adapters/interfaces/redis.h"
 #include "../../application/interfaces/redis.h"
+
+#include <stdbool.h>
+
 #include "../../adapters/response_parser.h"
 
 static int substr_count(char base_str[], char target[]) {
@@ -102,10 +105,8 @@ void send_command(char command[]) {
     }
 }
 
-char* get_response_redis(void) {
+char* get_response_redis() {
     extern int redis_server_socket_desc;
-
     char *response = read_from_socket(redis_server_socket_desc);
-
     return parse_response(response);
 }

@@ -2,7 +2,9 @@
 #include "../external/tcp/redis.h"
 #include "api.h"
 
+#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 static void print(char str[]) {
     for (; *str != '\0'; str++) {
@@ -22,7 +24,6 @@ static void print(char str[]) {
 
     putchar('\n');
 }
-
 
 int redis_server_socket_desc;
 
