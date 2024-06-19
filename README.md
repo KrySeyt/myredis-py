@@ -1,5 +1,5 @@
 # MyRedisCLI
-Python client library for [myredis](https://github.com/KrySeyt/myredis). Compatible with original Redis
+Python client library for [myredis](https://github.com/KrySeyt/myredis) written in C with Python wrapper. Compatible with original Redis
 
 Why C? Just because I can
 
