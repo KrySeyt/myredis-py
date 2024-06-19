@@ -31,6 +31,7 @@ dependencies = [
 [project.optional-dependencies]
 test = [
     "pytest",
+     "pytest-asyncio",
 ]
 types-checking = [
     "mypy",
