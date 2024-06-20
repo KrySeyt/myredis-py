@@ -15,4 +15,5 @@ add_library(myredis_py SHARED
         src/myredis/adapters/response_parser.c
         src/myredis/external/tcp/redis.h
         src/myredis/main/api.h
+        src/myredis/external/tcp/errors.c
 )

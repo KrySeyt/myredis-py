@@ -1,3 +1,5 @@
+#include "redis.h"
+
 #include "sys/socket.h"
 #include <arpa/inet.h>
 #include <stdio.h>
@@ -8,8 +10,7 @@
 
 #include "../../adapters/interfaces/redis.h"
 #include "../../application/interfaces/redis.h"
-
-#include <stdbool.h>
+#include "redis.h"
 
 #include "../../adapters/response_parser.h"
 
@@ -61,8 +62,7 @@ static char* read_from_socket(int socket_desc) {
             return response;
 
         default:
-            printf("Unknown server response: %s\n", response);
-            exit(1);
+            return UNKNOWN_SERVER_RESPONSE_ERROR;
     }
 
 }
@@ -71,8 +71,7 @@ int connect_(char redis_server_host[], const int redis_server_port) {
     int socket_desc = socket(AF_INET, SOCK_STREAM, 0);
 
     if (socket_desc < 0) {
-        printf("Unable to create socket");
-        exit(1);
+        return CONNECTION_ERROR;
     }
 
     struct sockaddr_in server_addr;
@@ -82,8 +81,7 @@ int connect_(char redis_server_host[], const int redis_server_port) {
     server_addr.sin_addr.s_addr = inet_addr(redis_server_host);
 
     if(connect(socket_desc, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0){
-        printf("Unable to connect\n");
-        exit(1);
+        return CONNECTION_ERROR;
     }
 
     return socket_desc;
@@ -94,15 +92,15 @@ void close_connection(const int socket_desc) {
     close(socket_desc);
 }
 
-void send_command(char command[]) {
+int send_command(char command[]) {
     extern int redis_server_socket_desc;
 
     int r = send(redis_server_socket_desc, command, strlen(command), 0);
 
     if (r < 0) {
-        printf("Unable to send cmd");
-        exit(1);
+        return COMMAND_SENDING_ERROR;
     }
+    return 0;
 }
 
 char* get_response_redis() {

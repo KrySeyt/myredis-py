@@ -1,6 +1,5 @@
 #include "../application/interfaces/redis.h"
 #include "./interfaces/redis.h"
-#include "../adapters/response_parser.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,12 +7,12 @@
 #include <tgmath.h>
 #include <time.h>
 
-void ping_redis() {
+int ping_redis() {
     char command[] = "*1\r\n$4\r\nPING\r\n";
     return send_command(command);
 }
 
-void echo_redis(char str[]) {
+int echo_redis(char str[]) {
     const int str_len = strlen(str);
     char* command = malloc(str_len + 30);
     sprintf(
@@ -26,11 +25,12 @@ void echo_redis(char str[]) {
         str_len,
         str
     );
-    send_command(command);
+    int result = send_command(command);
     free(command);
+    return result;
 }
 
-void get_redis(char key[]) {
+int get_redis(char key[]) {
     const int key_len = strlen(key);
     char* command = malloc(key_len + 30);
     sprintf(
@@ -43,11 +43,12 @@ void get_redis(char key[]) {
         key_len,
         key
     );
-    send_command(command);
+    int result = send_command(command);
     free(command);
+    return result;
 }
 
-void set_redis(char key[], char value[], const int lifetime) {
+int set_redis(char key[], char value[], const int lifetime) {
     const int key_len = strlen(key);
     const int value_len = strlen(value);
     char* command = malloc(key_len + value_len + 1000);
@@ -89,11 +90,12 @@ void set_redis(char key[], char value[], const int lifetime) {
             lifetime
         );
 
-    send_command(command);
+    int result = send_command(command);
     free(command);
+    return result;
 }
 
-void wait_redis(const int replicas_count, const int timeout) {
+int wait_redis(const int replicas_count, const int timeout) {
     char* command = malloc(300);
     sprintf(
         command,
@@ -109,11 +111,12 @@ void wait_redis(const int replicas_count, const int timeout) {
         (int) log10(abs(timeout)) + 1,
         timeout
     );
-    send_command(command);
+    int result = send_command(command);
     free(command);
+    return result;
 }
 
-void config_get_redis(char key[]) {
+int config_get_redis(char key[]) {
     const int key_len = strlen(key);
     char* command = malloc(key_len + 300);
     sprintf(
@@ -128,6 +131,7 @@ void config_get_redis(char key[]) {
         key_len,
         key
     );
-    send_command(command);
+    int result = send_command(command);
     free(command);
+    return result;
 }

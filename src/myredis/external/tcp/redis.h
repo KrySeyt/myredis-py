@@ -5,6 +5,12 @@
 #ifndef REDIS_H
 #define REDIS_H
 
+extern const int CONNECTION_ERROR;
+
+extern const int COMMAND_SENDING_ERROR;
+
+extern const char *UNKNOWN_SERVER_RESPONSE_ERROR;
+
 int connect_(char host[], const int port);
 
 void close_connection(const int socket_desc);
