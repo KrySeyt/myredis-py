@@ -6,7 +6,8 @@ import asyncio
 import selectors
 import socket
 import ctypes
-from typing import Self, Any
+from types import TracebackType
+from typing import Self, Any, cast
 from myasync import Await, IOType, Coroutine
 
 Seconds = float
@@ -48,7 +49,7 @@ class Redis:
         self._check_request_result(request_result)
 
         response = self._get_response()
-        return response.decode("utf-8") if response else response
+        return response.decode("utf-8") if isinstance(response, bytes) else response
 
     def set(self, key: str, value: str, lifetime: Seconds | None = None) -> None:
         request_result = self._redis_c_lib.send_set_request(
@@ -59,8 +60,7 @@ class Redis:
         )
         self._check_request_result(request_result)
 
-        response = self._get_response()
-        return response.decode("utf-8")
+        self._get_response()
 
     def echo(self, value: str) -> str:
         request_result = self._redis_c_lib.send_echo_request(
@@ -70,6 +70,7 @@ class Redis:
         self._check_request_result(request_result)
 
         response = self._get_response()
+        assert response is not None
         return response.decode("utf-8")
 
     def ping(self) -> None:
@@ -77,8 +78,6 @@ class Redis:
             self._redis_server_socket_descriptor,
         )
         self._check_request_result(request_result)
-
-        print(request_result)
 
         self._get_response()
 
@@ -91,6 +90,7 @@ class Redis:
         self._check_request_result(request_result)
 
         response = self._get_response()
+        assert response is not None
         return int(response)
 
     def config_get(self, key: str) -> str | None:
@@ -101,7 +101,7 @@ class Redis:
         self._check_request_result(request_result)
 
         response = self._get_response()
-        return response.decode("utf-8") if response else response
+        return response.decode("utf-8") if isinstance(response, bytes) else response
 
     def close(self) -> None:
         self._redis_c_lib.disconnect_from_redis_server(
@@ -111,7 +111,13 @@ class Redis:
     def __enter__(self) -> Self:
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(
+            self,
+            exc_type: type[BaseException] | None,
+            exc_val: BaseException | None,
+            exc_tb: TracebackType
+    ) -> None:
+
         self.close()
 
     def _connect(self) -> int:
@@ -124,17 +130,19 @@ class Redis:
             raise ConnectionError()
 
         socket_descriptor = result
+        assert isinstance(socket_descriptor, int)
         return socket_descriptor
 
-    def _get_response(self) -> Coroutine[bytes | None]:
+    def _get_response(self) -> bytes | None:
         response = self._redis_c_lib.get_response(
             self._redis_server_socket_descriptor
         )
         self._check_response(response)
 
+        assert response is None or isinstance(response, bytes)
         return response
 
-    def _check_request_result(self, result: bytes | int | None) -> None:
+    def _check_request_result(self, result: int | None) -> None:
         if result == self._sending_command_error_code:
             raise CommandSendingError
 
@@ -175,8 +183,8 @@ class MyAsyncRedis:
         )
         self._check_request_result(request_result)
 
-        response = self._get_response()
-        return response.decode("utf-8") if response else response
+        response = yield from self._get_response()
+        return response.decode("utf-8") if isinstance(response, bytes) else response
 
     def set(self, key: str, value: str, lifetime: Seconds | None = None) -> Coroutine[None]:
         yield Await(self._redis_server_socket, IOType.OUTPUT)
@@ -201,6 +209,7 @@ class MyAsyncRedis:
         self._check_request_result(request_result)
 
         response = yield from self._get_response()
+        assert response is not None
         return response.decode("utf-8")
 
     def ping(self) -> Coroutine[None]:
@@ -224,6 +233,7 @@ class MyAsyncRedis:
         self._check_request_result(request_result)
 
         response = yield from self._get_response()
+        assert response is not None
         return int(response)
 
     def config_get(self, key: str) -> Coroutine[str | None]:
@@ -236,7 +246,7 @@ class MyAsyncRedis:
         self._check_request_result(request_result)
 
         response = yield from self._get_response()
-        return response.decode("utf-8") if response else response
+        return response.decode("utf-8") if isinstance(response, bytes) else response
 
     def close(self) -> None:
         self._redis_c_lib.disconnect_from_redis_server(
@@ -246,7 +256,13 @@ class MyAsyncRedis:
     def __enter__(self) -> Self:
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(
+            self,
+            exc_type: type[BaseException] | None,
+            exc_val: BaseException | None,
+            exc_tb: TracebackType
+    ) -> None:
+
         self.close()
 
     def _connect(self) -> int:
@@ -259,6 +275,7 @@ class MyAsyncRedis:
             raise ConnectionError()
 
         socket_descriptor = result
+        assert isinstance(socket_descriptor, int)
         return socket_descriptor
 
     def _check_response(self, response: bytes | int | None) -> None:
@@ -276,6 +293,7 @@ class MyAsyncRedis:
             self._redis_server_socket.fileno(),
         )
         self._check_response(response)
+        assert response is None or isinstance(response, bytes)
 
         return response
 
@@ -301,7 +319,9 @@ class AsyncRedis:
 
         redis_server_socket_descriptor = self._connect()
         self._redis_server_socket = socket.socket(fileno=redis_server_socket_descriptor)
-        self._selector: selectors.BaseSelector = type(asyncio.get_event_loop()._selector)()
+        self._selector: selectors.BaseSelector = type(
+            asyncio.get_event_loop()._selector  # type: ignore [attr-defined]
+        )()
         self._selector.register(self._redis_server_socket, selectors.EVENT_READ + selectors.EVENT_WRITE)
 
     async def get(self, key: str) -> str | None:
@@ -314,7 +334,7 @@ class AsyncRedis:
         self._check_request_result(request_result)
 
         response = await self._get_response()
-        return response.decode("utf-8") if response else response
+        return response.decode("utf-8") if isinstance(response, bytes) else response
 
     async def set(self, key: str, value: str, lifetime: Seconds | None = None) -> None:
         await self._wait_event_ready(selectors.EVENT_WRITE)
@@ -339,6 +359,7 @@ class AsyncRedis:
         self._check_request_result(request_result)
 
         response = await self._get_response()
+        assert response is not None
         return response.decode("utf-8")
 
     async def _wait_event_ready(self, event: int) -> None:
@@ -378,6 +399,7 @@ class AsyncRedis:
         self._check_request_result(request_result)
 
         response = await self._get_response()
+        assert response is not None
         return int(response)
 
     async def config_get(self, key: str) -> str | None:
@@ -390,7 +412,7 @@ class AsyncRedis:
         self._check_request_result(request_result)
 
         response = await self._get_response()
-        return response.decode("utf-8") if response else response
+        return response.decode("utf-8") if isinstance(response, bytes) else response
 
     async def close(self) -> None:
         self._redis_c_lib.disconnect_from_redis_server(
@@ -400,7 +422,12 @@ class AsyncRedis:
     async def __aenter__(self) -> Self:
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+    async def __aexit__(
+            self,
+            exc_type: type[BaseException] | None,
+            exc_val: BaseException | None,
+            exc_tb: TracebackType,
+    ) -> None:
         await self.close()
 
     def _connect(self) -> int:
@@ -413,6 +440,7 @@ class AsyncRedis:
             raise ConnectionError()
 
         socket_descriptor = result
+        assert isinstance(socket_descriptor, int)
         return socket_descriptor
 
     async def _get_response(self) -> bytes | None:
@@ -423,6 +451,7 @@ class AsyncRedis:
         )
         self._check_response(response)
 
+        assert response is None or isinstance(response, bytes)
         return response
 
     def _check_response(self, response: bytes | int | None) -> None:
