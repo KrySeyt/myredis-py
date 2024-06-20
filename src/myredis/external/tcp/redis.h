@@ -9,7 +9,7 @@ extern const int CONNECTION_ERROR;
 
 extern const int COMMAND_SENDING_ERROR;
 
-extern const char *UNKNOWN_SERVER_RESPONSE_ERROR;
+extern const int UNKNOWN_SERVER_RESPONSE_ERROR;
 
 int connect_(char host[], const int port);
 

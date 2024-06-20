@@ -3,10 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-char* parse_response(char response[]) {
-    char *parsed_response = malloc(200);
+void parse_response(char response[], char *out) {
     char *curr_resp = response;
-    char *curr_parsed = parsed_response;
+    char *curr_parsed = out;
     switch (response[0]) {
         case '+': case ':':
             while (*++curr_resp != '\r') {
@@ -15,11 +14,11 @@ char* parse_response(char response[]) {
 
             *(curr_parsed) = '\0';
 
-            return parsed_response;
+            return;
 
         case '$':
             if (response[1] == '-' && response[2] == '1') {
-                return NULL;
+                return;
             }
 
             while (*curr_resp != '\n')
@@ -31,7 +30,7 @@ char* parse_response(char response[]) {
 
             *(curr_parsed) = '\0';
 
-            return parsed_response;
+            return;
 
         case '*':
             for (int i = 0; i < 4; i++) {
@@ -48,10 +47,10 @@ char* parse_response(char response[]) {
 
             *curr_parsed = '\0';
 
-            return parsed_response;
+            return;
 
         default:
             printf("%s", response);
-            return "";
+            return;
     }
 }

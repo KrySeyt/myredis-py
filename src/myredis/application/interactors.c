@@ -24,6 +24,6 @@ int config_get_interactor(char key[]) {
     return config_get_redis(key);
 }
 
-char* get_response_interactor(void) {
-    return get_response_redis();
+void get_response_interactor(char *out) {
+    return get_response_redis(out);
 }

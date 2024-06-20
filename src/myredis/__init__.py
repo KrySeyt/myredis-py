@@ -134,13 +134,16 @@ class Redis:
         return socket_descriptor
 
     def _get_response(self) -> bytes | None:
-        response = self._redis_c_lib.get_response(
-            self._redis_server_socket_descriptor
+        response_out = ctypes.create_string_buffer("".encode("utf-8"), 2000)
+        self._redis_c_lib.get_response(
+            self._redis_server_socket_descriptor,
+            response_out,
         )
+        response = bytes(response_out).rstrip(b"\x00")
         self._check_response(response)
 
         assert response is None or isinstance(response, bytes)
-        return response
+        return response if response else None
 
     def _check_request_result(self, result: int | None) -> None:
         if result == self._sending_command_error_code:
@@ -289,13 +292,16 @@ class MyAsyncRedis:
     def _get_response(self) -> Coroutine[bytes | None]:
         yield Await(self._redis_server_socket, IOType.INPUT)
 
-        response = self._redis_c_lib.get_response(
+        response_out = ctypes.create_string_buffer("".encode("utf-8"), 2000)
+        self._redis_c_lib.get_response(
             self._redis_server_socket.fileno(),
+            response_out,
         )
+        response = bytes(response_out).rstrip(b"\x00")
         self._check_response(response)
-        assert response is None or isinstance(response, bytes)
 
-        return response
+        assert response is None or isinstance(response, bytes)
+        return response if response else None
 
 
 class AsyncRedis:
@@ -446,13 +452,16 @@ class AsyncRedis:
     async def _get_response(self) -> bytes | None:
         await self._wait_event_ready(selectors.EVENT_READ)
 
-        response = self._redis_c_lib.get_response(
+        response_out = ctypes.create_string_buffer("".encode("utf-8"), 2000)
+        self._redis_c_lib.get_response(
             self._redis_server_socket.fileno(),
+            response_out,
         )
+        response = bytes(response_out).rstrip(b"\x00")
         self._check_response(response)
 
         assert response is None or isinstance(response, bytes)
-        return response
+        return response if response else None
 
     def _check_response(self, response: bytes | int | None) -> None:
         if response == self._unknown_server_response_error_code:

@@ -5,6 +5,6 @@
 #ifndef RESPONSE_PARSER_H
 #define RESPONSE_PARSER_H
 
-char* parse_response(char response[]);
+void parse_response(char response[], char *out);
 
 #endif //RESPONSE_PARSER_H

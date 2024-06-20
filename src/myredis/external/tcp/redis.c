@@ -24,12 +24,12 @@ static int substr_count(char base_str[], char target[]) {
 
 }
 
-static char* read_from_socket(int socket_desc) {
-    char *response = malloc(2000); // TODO: mb memory leak
+static int read_from_socket(int socket_desc, char* response) {
     int received_bytes = recv(socket_desc, response, 2000, 0);
 
-    if (!received_bytes)
-        return "";
+    if (!received_bytes) {
+        return 0;
+    }
 
     char *curr;
     switch (response[0]) {
@@ -40,7 +40,7 @@ static char* read_from_socket(int socket_desc) {
             }
             *(++curr) = '\0';
 
-            return response;
+            return 0;
 
         case '$':
             curr = response + received_bytes - 1;
@@ -50,7 +50,7 @@ static char* read_from_socket(int socket_desc) {
 
             *(++curr) = '\0';
 
-            return response;
+            return 0;
 
         case '*':
             curr = response + received_bytes - 1;
@@ -59,7 +59,7 @@ static char* read_from_socket(int socket_desc) {
             }
             *(++curr) = '\0';
 
-            return response;
+            return 0;
 
         default:
             return UNKNOWN_SERVER_RESPONSE_ERROR;
@@ -100,11 +100,17 @@ int send_command(char command[]) {
     if (r < 0) {
         return COMMAND_SENDING_ERROR;
     }
+    
     return 0;
 }
 
-char* get_response_redis() {
+void get_response_redis(char *out) {
     extern int redis_server_socket_desc;
-    char *response = read_from_socket(redis_server_socket_desc);
-    return parse_response(response);
+
+    char *response = malloc(2000);
+    int c = read_from_socket(redis_server_socket_desc, response);
+
+    parse_response(response, out);
+
+    free(response);
 }

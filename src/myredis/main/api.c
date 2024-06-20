@@ -35,15 +35,13 @@ void disconnect_from_redis_server(const int socket_desc) {
     close_connection(socket_desc);
 }
 
-char* get_response(const int socket_desc) {
+void get_response(const int socket_desc, char out[]) {
     redis_server_socket_desc = socket_desc;
-
-    return get_response_interactor();
+    return get_response_interactor(out);
 }
 
 int send_ping_request(const int socket_desc) {
     redis_server_socket_desc = socket_desc;
-
     return ping_interactor();
 }
 

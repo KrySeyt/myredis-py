@@ -13,6 +13,6 @@ int wait_redis(const int replicas_count, const int timeout);
 
 int config_get_redis(char key[]);
 
-char* get_response_redis(void);
+void get_response_redis(char *out);
 
 #endif //REDIS_H

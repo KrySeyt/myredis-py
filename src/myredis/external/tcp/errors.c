@@ -7,4 +7,4 @@ const int CONNECTION_ERROR = -1;
 
 const int COMMAND_SENDING_ERROR = -2;
 
-const char *UNKNOWN_SERVER_RESPONSE_ERROR = "";
+const int UNKNOWN_SERVER_RESPONSE_ERROR = -3;
