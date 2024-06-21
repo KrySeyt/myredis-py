@@ -134,7 +134,7 @@ class Redis:
         return socket_descriptor
 
     def _get_response(self) -> bytes | None:
-        response_out = ctypes.create_string_buffer("".encode("utf-8"), 2000)
+        response_out = ctypes.create_string_buffer("".encode("utf-8"), 10_000)
         self._redis_c_lib.get_response(
             self._redis_server_socket_descriptor,
             response_out,
@@ -292,7 +292,7 @@ class MyAsyncRedis:
     def _get_response(self) -> Coroutine[bytes | None]:
         yield Await(self._redis_server_socket, IOType.INPUT)
 
-        response_out = ctypes.create_string_buffer("".encode("utf-8"), 2000)
+        response_out = ctypes.create_string_buffer("".encode("utf-8"), 10_000)
         self._redis_c_lib.get_response(
             self._redis_server_socket.fileno(),
             response_out,
@@ -452,7 +452,7 @@ class AsyncRedis:
     async def _get_response(self) -> bytes | None:
         await self._wait_event_ready(selectors.EVENT_READ)
 
-        response_out = ctypes.create_string_buffer("".encode("utf-8"), 2000)
+        response_out = ctypes.create_string_buffer("".encode("utf-8"), 10_000)
         self._redis_c_lib.get_response(
             self._redis_server_socket.fileno(),
             response_out,
