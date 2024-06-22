@@ -132,7 +132,7 @@ class MyAsyncRedis:
     def get(self, key: str) -> Coroutine[str | None]:
         yield Await(self._redis_server_socket, IOType.OUTPUT)
 
-        request_result = _myredis.send_get_request(
+        _myredis.send_get_request(
             self._redis_server_socket.fileno(),
             key,
         )
@@ -143,7 +143,7 @@ class MyAsyncRedis:
     def set(self, key: str, value: str, lifetime: Seconds | None = None) -> Coroutine[None]:
         yield Await(self._redis_server_socket, IOType.OUTPUT)
 
-        request_result = _myredis.send_set_request(
+        _myredis.send_set_request(
             self._redis_server_socket.fileno(),
             key,
             value,
@@ -155,7 +155,7 @@ class MyAsyncRedis:
     def echo(self, value: str) -> Coroutine[str]:
         yield Await(self._redis_server_socket, IOType.OUTPUT)
 
-        request_result = _myredis.send_echo_request(
+        _myredis.send_echo_request(
             self._redis_server_socket.fileno(),
             value,
         )
@@ -167,7 +167,7 @@ class MyAsyncRedis:
     def ping(self) -> Coroutine[None]:
         yield Await(self._redis_server_socket, IOType.OUTPUT)
 
-        request_result = _myredis.send_ping_request(
+        _myredis.send_ping_request(
             self._redis_server_socket.fileno(),
         )
 
@@ -176,7 +176,7 @@ class MyAsyncRedis:
     def wait(self, replicas_count: int, timeout: Seconds) -> Coroutine[int]:
         yield Await(self._redis_server_socket, IOType.OUTPUT)
 
-        request_result = _myredis.send_wait_request(
+        _myredis.send_wait_request(
             self._redis_server_socket.fileno(),
             replicas_count,
             int(timeout * 1000),
@@ -189,7 +189,7 @@ class MyAsyncRedis:
     def config_get(self, key: str) -> Coroutine[str | None]:
         yield Await(self._redis_server_socket, IOType.OUTPUT)
 
-        request_result = _myredis.send_config_get_request(
+        _myredis.send_config_get_request(
             self._redis_server_socket.fileno(),
             key,
         )
