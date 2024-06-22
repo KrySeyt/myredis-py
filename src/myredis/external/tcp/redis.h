@@ -11,7 +11,7 @@ extern const int COMMAND_SENDING_ERROR;
 
 extern const int UNKNOWN_SERVER_RESPONSE_ERROR;
 
-int connect_(char host[], const int port);
+int connect_(const char host[], const int port);
 
 void close_connection(const int socket_desc);
 

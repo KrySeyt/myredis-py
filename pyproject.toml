@@ -22,7 +22,7 @@ version = "0.0.0"
 authors = [
     { name = "Sequew", email = "kryseyt@gmail.com" },
 ]
-description = "MyRedis Python client library written on C"
+description = "MyRedis Python client library written in C"
 requires-python = ">=3.11"
 dependencies = [
     "myasync@git+https://github.com/KrySeyt/myasync"

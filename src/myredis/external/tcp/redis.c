@@ -67,7 +67,7 @@ static int read_from_socket(int socket_desc, char* response) {
 
 }
 
-int connect_(char redis_server_host[], const int redis_server_port) {
+int connect_(const char redis_server_host[], const int redis_server_port) {
     int socket_desc = socket(AF_INET, SOCK_STREAM, 0);
 
     if (socket_desc < 0) {
@@ -92,7 +92,7 @@ void close_connection(const int socket_desc) {
     close(socket_desc);
 }
 
-int send_command(char command[]) {
+int send_command(const char command[]) {
     extern int redis_server_socket_desc;
 
     int r = send(redis_server_socket_desc, command, strlen(command), 0);
@@ -104,7 +104,7 @@ int send_command(char command[]) {
     return 0;
 }
 
-void get_response_redis(char *out) {
+void get_response_redis(const char *out) {
     extern int redis_server_socket_desc;
 
     char *response = malloc(2000);

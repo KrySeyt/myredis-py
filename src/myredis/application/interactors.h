@@ -3,16 +3,16 @@
 
 int ping_interactor(void);
 
-int echo_interactor(char str[]);
+int echo_interactor(const char str[]);
 
-int get_interactor(char key[]);
+int get_interactor(const char key[]);
 
-int set_interactor(char key[], char value[], const int lifetime);
+int set_interactor(const char key[], const char value[], const int lifetime);
 
 int wait_interactor(const int replicas_count, const int timeout);
 
-int config_get_interactor(char key[]);
+int config_get_interactor(const char key[]);
 
-void get_response_interactor(char* out);
+void get_response_interactor(const char* out);
 
 #endif //INTERACTORS_H

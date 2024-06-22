@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void parse_response(char response[], char *out) {
+void parse_response(const char response[], const char *out) {
     char *curr_resp = response;
     char *curr_parsed = out;
     switch (response[0]) {
