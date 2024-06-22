@@ -6,7 +6,6 @@
 
 #include "../application/interactors.h"
 #include "../external/tcp/redis.h"
-#include "python_api.h"
 //
 // static void print(char str[]) {
 //     for (; *str != '\0'; str++) {
@@ -29,6 +28,10 @@
 
 int redis_server_socket_desc;
 
+static PyObject *CommandSendingError;
+
+static PyObject *UnknownServerResponseError;
+
 static PyObject *
 _myredis_connect_to_redis_server(PyObject *self, PyObject *args)
 {
@@ -37,6 +40,14 @@ _myredis_connect_to_redis_server(PyObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "si", &host, &port))
         return NULL;
+
+    int result = connect_(host, port);
+
+    switch (result) {
+        case CONNECTION_REFUSED_ERROR:
+            PyErr_SetString(PyExc_ConnectionRefusedError, "");
+            return NULL;
+    }
 
     return PyLong_FromLong(connect_(host, port));
 }
@@ -66,7 +77,13 @@ _myredis_get_response(PyObject *self, PyObject *args)
 
     char *out = malloc(10000);
     out[0] = '\0';
-    get_response_interactor(out);
+    int status = get_response_interactor(out);
+
+    switch (status) {
+        case UNKNOWN_SERVER_RESPONSE_ERROR:
+            PyErr_SetString(UnknownServerResponseError, "");
+            return NULL;
+    }
 
     if (out[0] == '\0') {
         Py_RETURN_NONE;
@@ -86,7 +103,15 @@ _myredis_send_ping_request(PyObject *self, PyObject *args)
         return NULL;
 
     redis_server_socket_desc = socket_desc;
-    return PyLong_FromLong(ping_interactor());
+    int status = ping_interactor();
+
+    switch (status) {
+        case COMMAND_SENDING_ERROR:
+            PyErr_SetString(CommandSendingError, "");
+            return NULL;
+    }
+
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -99,7 +124,15 @@ _myredis_send_echo_request(PyObject *self, PyObject *args)
         return NULL;
 
     redis_server_socket_desc = socket_desc;
-    return PyLong_FromLong(echo_interactor(str));
+    int status = echo_interactor(str);
+
+    switch (status) {
+        case COMMAND_SENDING_ERROR:
+            PyErr_SetString(CommandSendingError, "");
+            return NULL;
+    }
+
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -112,7 +145,15 @@ _myredis_send_get_request(PyObject *self, PyObject *args)
         return NULL;
 
     redis_server_socket_desc = socket_desc;
-    return PyLong_FromLong(get_interactor(key));
+    int status = get_interactor(key);
+
+    switch (status) {
+        case COMMAND_SENDING_ERROR:
+            PyErr_SetString(CommandSendingError, "");
+            return NULL;
+    }
+
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -127,7 +168,15 @@ _myredis_send_set_request(PyObject *self, PyObject *args)
         return NULL;
 
     redis_server_socket_desc = socket_desc;
-    return PyLong_FromLong(set_interactor(key, value, lifetime));
+    int status = set_interactor(key, value, lifetime);
+
+    switch (status) {
+        case COMMAND_SENDING_ERROR:
+            PyErr_SetString(CommandSendingError, "");
+            return NULL;
+    }
+
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -141,7 +190,15 @@ _myredis_send_wait_request(PyObject *self, PyObject *args)
         return NULL;
 
     redis_server_socket_desc = socket_desc;
-    return PyLong_FromLong(wait_interactor(replicas_count, timeout));
+    int status = wait_interactor(replicas_count, timeout);
+
+    switch (status) {
+        case COMMAND_SENDING_ERROR:
+            PyErr_SetString(CommandSendingError, "");
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
 }
 
 static PyObject *
@@ -154,7 +211,15 @@ _myredis_send_config_get_request(PyObject *self, PyObject *args)
         return NULL;
 
     redis_server_socket_desc = socket_desc;
-    return PyLong_FromLong(config_get_interactor(key));
+    int status = config_get_interactor(key);
+
+    switch (status) {
+        case COMMAND_SENDING_ERROR:
+            PyErr_SetString(CommandSendingError, "");
+            return NULL;
+    }
+
+    Py_RETURN_NONE;
 }
 
 static PyMethodDef MyredisMethods[] = {
@@ -181,5 +246,28 @@ static struct PyModuleDef _myredis_libmodule = {
 
 PyMODINIT_FUNC PyInit__myredis(void)
 {
-    return PyModule_Create(&_myredis_libmodule);
+    PyObject *module = PyModule_Create(&_myredis_libmodule);
+
+    if (module == NULL)
+        return NULL;
+
+    CommandSendingError = PyErr_NewException("myredis.CommandSendingError", NULL, NULL);
+    Py_IncRef(CommandSendingError);
+    if (PyModule_AddObject(module, "CommandSendingError", CommandSendingError) < 0) {
+        Py_XDECREF(CommandSendingError);
+        Py_CLEAR(CommandSendingError);
+        Py_DECREF(CommandSendingError);
+        return NULL;
+    }
+
+    UnknownServerResponseError = PyErr_NewException("myredis.UnknownServerResponseError", NULL, NULL);
+    Py_IncRef(UnknownServerResponseError);
+    if (PyModule_AddObject(module, "UnknownServerResponseError", UnknownServerResponseError) < 0) {
+        Py_XDECREF(UnknownServerResponseError);
+        Py_CLEAR(UnknownServerResponseError);
+        Py_DECREF(UnknownServerResponseError);
+        return NULL;
+    }
+
+    return module;
 }

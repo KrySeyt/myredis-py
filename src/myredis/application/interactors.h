@@ -13,6 +13,6 @@ int wait_interactor(const int replicas_count, const int timeout);
 
 int config_get_interactor(const char key[]);
 
-void get_response_interactor(const char* out);
+int get_response_interactor(const char* out);
 
 #endif //INTERACTORS_H

@@ -9,7 +9,6 @@ setup(
                 "src/myredis/application/interactors.c",
                 "src/myredis/adapters/commands.c",
                 "src/myredis/adapters/response_parser.c",
-                "src/myredis/external/tcp/errors.c",
                 "src/myredis/external/tcp/redis.c",
             ],
         ),

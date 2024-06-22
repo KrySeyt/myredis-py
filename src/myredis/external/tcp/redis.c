@@ -71,7 +71,7 @@ int connect_(const char redis_server_host[], const int redis_server_port) {
     int socket_desc = socket(AF_INET, SOCK_STREAM, 0);
 
     if (socket_desc < 0) {
-        return CONNECTION_ERROR;
+        return CONNECTION_REFUSED_ERROR;
     }
 
     struct sockaddr_in server_addr;
@@ -81,7 +81,7 @@ int connect_(const char redis_server_host[], const int redis_server_port) {
     server_addr.sin_addr.s_addr = inet_addr(redis_server_host);
 
     if(connect(socket_desc, (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0){
-        return CONNECTION_ERROR;
+        return CONNECTION_REFUSED_ERROR;
     }
 
     return socket_desc;
@@ -104,13 +104,15 @@ int send_command(const char command[]) {
     return 0;
 }
 
-void get_response_redis(const char *out) {
+int get_response_redis(const char *out) {
     extern int redis_server_socket_desc;
 
     char *response = malloc(2000);
-    int c = read_from_socket(redis_server_socket_desc, response);
+    int status_code = read_from_socket(redis_server_socket_desc, response);
 
     parse_response(response, out);
 
     free(response);
+
+    return status_code;
 }

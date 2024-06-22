@@ -50,7 +50,7 @@ void parse_response(const char response[], const char *out) {
             return;
 
         default:
-            printf("%s", response);
+            printf("Unknown server response: %s\n", response);
             return;
     }
 }

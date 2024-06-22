@@ -1,5 +1,9 @@
 __all__ = (
     "Redis",
+    "AsyncRedis",
+    "MyAsyncRedis",
+    "CommandSendingError",
+    "UnknownServerResponseError"
 )
 
 import asyncio
@@ -9,17 +13,10 @@ from types import TracebackType
 from typing import Self
 
 import _myredis
+from _myredis import CommandSendingError, UnknownServerResponseError
 from myasync import Await, IOType, Coroutine
 
 Seconds = float
-
-
-class CommandSendingError(Exception):
-    pass
-
-
-class UnknownServerResponseError(ValueError):
-    pass
 
 
 class Redis:
