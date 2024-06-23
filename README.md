@@ -18,3 +18,19 @@ python -m venv .venv
 ```shell
 pip install myasync-py@git+https://github.com/KrySeyt/myredis-py.git
 ```
+
+# Example
+```python
+import asyncio
+
+from myredis import AsyncRedis
+
+async def main() -> None:
+    async with AsyncRedis(host="localhost", port=6379) as redis:
+        await redis.set("foo", "bar", lifetime=1.5)
+        print(await redis.get("foo"))
+
+if __name__ == "__main__":
+    asyncio.run(main())
+
+```

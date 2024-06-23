@@ -95,6 +95,9 @@ class Redis:
     def __exit__(self, *args) -> None:
         self.close()
 
+    def __del__(self) -> None:
+        self.close()
+
     def _connect(self) -> int:
         result = _myredis.connect_to_redis_server(
             self.host,
@@ -198,6 +201,9 @@ class MyAsyncRedis:
         return self
 
     def __exit__(self, *args) -> None:
+        self.close()
+
+    def __del__(self) -> None:
         self.close()
 
     def _connect(self) -> int:
@@ -317,6 +323,9 @@ class AsyncRedis:
 
     async def __aexit__(self, *args) -> None:
         await self.close()
+
+    def __del__(self) -> None:
+        self.close()
 
     def _connect(self) -> int:
         result = _myredis.connect_to_redis_server(
