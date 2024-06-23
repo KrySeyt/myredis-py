@@ -32,11 +32,13 @@ static PyObject *CommandSendingError;
 
 static PyObject *UnknownServerResponseError;
 
+static PyObject *SocketCreationError;
+
 static PyObject *
 _myredis_connect_to_redis_server(PyObject *self, PyObject *args)
 {
     const char *host;
-    int port;
+    const int port;
 
     if (!PyArg_ParseTuple(args, "si", &host, &port))
         return NULL;
@@ -45,7 +47,11 @@ _myredis_connect_to_redis_server(PyObject *self, PyObject *args)
 
     switch (result) {
         case CONNECTION_REFUSED_ERROR:
-            PyErr_SetString(PyExc_ConnectionRefusedError, "");
+            PyErr_SetFromErrno(PyExc_ConnectionRefusedError);
+            return NULL;
+
+        case SOCKET_CREATION_ERROR:
+            PyErr_SetFromErrno(SocketCreationError);
             return NULL;
     }
 
@@ -55,7 +61,7 @@ _myredis_connect_to_redis_server(PyObject *self, PyObject *args)
 static PyObject *
 _myredis_disconnect_from_redis_server(PyObject *self, PyObject *args)
 {
-    int socket_desc;
+    const int socket_desc;
 
     if (!PyArg_ParseTuple(args, "i", &socket_desc))
         return NULL;
@@ -68,7 +74,7 @@ _myredis_disconnect_from_redis_server(PyObject *self, PyObject *args)
 static PyObject *
 _myredis_get_response(PyObject *self, PyObject *args)
 {
-    int socket_desc;
+    const int socket_desc;
 
     if (!PyArg_ParseTuple(args, "i", &socket_desc))
         return NULL;
@@ -77,7 +83,7 @@ _myredis_get_response(PyObject *self, PyObject *args)
 
     char *out = malloc(10000);
     out[0] = '\0';
-    int status = get_response_interactor(out);
+    const int status = get_response_interactor(out);
 
     switch (status) {
         case UNKNOWN_SERVER_RESPONSE_ERROR:
@@ -97,13 +103,13 @@ _myredis_get_response(PyObject *self, PyObject *args)
 static PyObject *
 _myredis_send_ping_request(PyObject *self, PyObject *args)
 {
-    int socket_desc;
+    const int socket_desc;
 
     if (!PyArg_ParseTuple(args, "i", &socket_desc))
         return NULL;
 
     redis_server_socket_desc = socket_desc;
-    int status = ping_interactor();
+    const int status = ping_interactor();
 
     switch (status) {
         case COMMAND_SENDING_ERROR:
@@ -117,14 +123,14 @@ _myredis_send_ping_request(PyObject *self, PyObject *args)
 static PyObject *
 _myredis_send_echo_request(PyObject *self, PyObject *args)
 {
-    int socket_desc;
+    const int socket_desc;
     const char *str;
 
     if (!PyArg_ParseTuple(args, "is", &socket_desc, &str))
         return NULL;
 
     redis_server_socket_desc = socket_desc;
-    int status = echo_interactor(str);
+    const int status = echo_interactor(str);
 
     switch (status) {
         case COMMAND_SENDING_ERROR:
@@ -138,14 +144,14 @@ _myredis_send_echo_request(PyObject *self, PyObject *args)
 static PyObject *
 _myredis_send_get_request(PyObject *self, PyObject *args)
 {
-    int socket_desc;
+    const int socket_desc;
     const char *key;
 
     if (!PyArg_ParseTuple(args, "is", &socket_desc, &key))
         return NULL;
 
     redis_server_socket_desc = socket_desc;
-    int status = get_interactor(key);
+    const int status = get_interactor(key);
 
     switch (status) {
         case COMMAND_SENDING_ERROR:
@@ -159,16 +165,16 @@ _myredis_send_get_request(PyObject *self, PyObject *args)
 static PyObject *
 _myredis_send_set_request(PyObject *self, PyObject *args)
 {
-    int socket_desc;
+    const int socket_desc;
     const char *key;
     const char *value;
-    int lifetime;
+    const int lifetime;
 
     if (!PyArg_ParseTuple(args, "issi", &socket_desc, &key, &value, &lifetime))
         return NULL;
 
     redis_server_socket_desc = socket_desc;
-    int status = set_interactor(key, value, lifetime);
+    const int status = set_interactor(key, value, lifetime);
 
     switch (status) {
         case COMMAND_SENDING_ERROR:
@@ -182,15 +188,15 @@ _myredis_send_set_request(PyObject *self, PyObject *args)
 static PyObject *
 _myredis_send_wait_request(PyObject *self, PyObject *args)
 {
-    int socket_desc;
-    int replicas_count;
-    int timeout;
+    const int socket_desc;
+    const int replicas_count;
+    const int timeout;
 
     if (!PyArg_ParseTuple(args, "iii", &socket_desc, &replicas_count, &timeout))
         return NULL;
 
     redis_server_socket_desc = socket_desc;
-    int status = wait_interactor(replicas_count, timeout);
+    const int status = wait_interactor(replicas_count, timeout);
 
     switch (status) {
         case COMMAND_SENDING_ERROR:
@@ -204,14 +210,14 @@ _myredis_send_wait_request(PyObject *self, PyObject *args)
 static PyObject *
 _myredis_send_config_get_request(PyObject *self, PyObject *args)
 {
-    int socket_desc;
+    const int socket_desc;
     const char *key;
 
     if (!PyArg_ParseTuple(args, "is", &socket_desc, &key))
         return NULL;
 
     redis_server_socket_desc = socket_desc;
-    int status = config_get_interactor(key);
+    const int status = config_get_interactor(key);
 
     switch (status) {
         case COMMAND_SENDING_ERROR:
@@ -266,6 +272,15 @@ PyMODINIT_FUNC PyInit__myredis(void)
         Py_XDECREF(UnknownServerResponseError);
         Py_CLEAR(UnknownServerResponseError);
         Py_DECREF(UnknownServerResponseError);
+        return NULL;
+    }
+
+    SocketCreationError = PyErr_NewException("myredis.SocketCreationError", NULL, NULL);
+    Py_IncRef(SocketCreationError);
+    if (PyModule_AddObject(module, "SocketCreationError", SocketCreationError) < 0) {
+        Py_XDECREF(SocketCreationError);
+        Py_CLEAR(SocketCreationError);
+        Py_DECREF(SocketCreationError);
         return NULL;
     }
 

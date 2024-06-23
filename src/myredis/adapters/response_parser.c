@@ -40,11 +40,10 @@ void parse_response(const char response[], const char *out) {
                 curr_resp++;
             }
 
-
             while (*curr_resp != '\r') {
+                // printf("C: %c\n", *curr_resp);
                 *(curr_parsed++) = *(curr_resp++);
             }
-
             *curr_parsed = '\0';
 
             return;

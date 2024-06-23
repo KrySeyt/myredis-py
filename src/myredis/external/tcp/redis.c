@@ -14,64 +14,107 @@
 
 #include "../../adapters/response_parser.h"
 
-static int substr_count(char base_str[], char target[]) {
-    char *substr_start = strstr(base_str, target);
 
-    if (substr_start == NULL)
-        return 0;
+static void print(char str[]) {
+    for (; *str != '\0'; str++) {
+        if (*str == '\n') {
+            putchar('\\');
+            putchar('n');
+        }
 
-    return 1 + substr_count(substr_start + strlen(target), target);
+        else if (*str == '\r') {
+            putchar('\\');
+            putchar('r');
+        }
+        else {
+            putchar(*str);
+        }
+    }
 
+    putchar('\n');
 }
 
-static int read_from_socket(int socket_desc, char* response) {
-    int received_bytes = recv(socket_desc, response, 2000, 0);
+static int count_new_line(const char str[]) {
+    int str_len = strlen(str);
+    int c = 0;
+    for (int i = 0; i < str_len; i++)
+    {
+        if (str[i] == '\n')
+            c++;
+    }
+    return c;
+}
 
-    if (!received_bytes) {
+static int count_nulls(const char str[]) {
+    int str_len = strlen(str);
+    int c = 0;
+    for (int i = 0; i < str_len; i++)
+    {
+        if (str[i-2] == '$' && str[i-1] == '-' && str[i] == '1')
+            c++;
+    }
+    return c;
+}
+
+static int read_from_socket(const int socket_desc, char* response, const int response_size, const int start_write) {
+    static int s = 0;
+    const int received_bytes = recv(socket_desc, response + start_write, response_size, 0);
+    s += received_bytes;
+
+    if (received_bytes == response_size) {
+        return BUFFER_IS_FULL;
+    }
+
+    if (!s) {
         return 0;
     }
 
     char *curr;
     switch (response[0]) {
         case '+': case ':':
-            curr = response + received_bytes - 1;
+            curr = response + s - 1;
             while (*curr != '\n') {
                 curr += recv(socket_desc, curr, 2000, 0);
             }
             *(++curr) = '\0';
 
+            s = 0;
             return 0;
 
         case '$':
-            curr = response + received_bytes - 1;
+            curr = response + s - 1;
             while ((curr - response + 1) < (atoi(response + 1) + 6) ) {
                 curr += recv(socket_desc, curr, 2000, 0);
             }
 
             *(++curr) = '\0';
 
+            s = 0;
             return 0;
 
         case '*':
-            curr = response + received_bytes - 1;
-            while (substr_count(response, "\r\n") != 5) {
+            curr = response + s;
+            *curr = '\0';
+            while (count_new_line(response) != 5 - count_nulls(response)) {
                 curr += recv(socket_desc, curr, 2000, 0);
             }
             *(++curr) = '\0';
 
+            s = 0;
             return 0;
 
         default:
+            s = 0;
             return UNKNOWN_SERVER_RESPONSE_ERROR;
     }
 
 }
 
 int connect_(const char redis_server_host[], const int redis_server_port) {
-    int socket_desc = socket(AF_INET, SOCK_STREAM, 0);
+    const int socket_desc = socket(AF_INET, SOCK_STREAM, 0);
 
     if (socket_desc < 0) {
-        return CONNECTION_REFUSED_ERROR;
+        return SOCKET_CREATION_ERROR;
     }
 
     struct sockaddr_in server_addr;
@@ -95,9 +138,9 @@ void close_connection(const int socket_desc) {
 int send_command(const char command[]) {
     extern int redis_server_socket_desc;
 
-    int r = send(redis_server_socket_desc, command, strlen(command), 0);
+    const int status = send(redis_server_socket_desc, command, strlen(command), 0);
 
-    if (r < 0) {
+    if (status < 0) {
         return COMMAND_SENDING_ERROR;
     }
     
@@ -107,12 +150,25 @@ int send_command(const char command[]) {
 int get_response_redis(const char *out) {
     extern int redis_server_socket_desc;
 
-    char *response = malloc(2000);
-    int status_code = read_from_socket(redis_server_socket_desc, response);
+    int c = 1;
+    char *response = malloc(1000 * c);
+    int status = read_from_socket(redis_server_socket_desc, response, 1000, 0);
+
+    while (status == BUFFER_IS_FULL) {
+        c++;
+        int response_size = 1000 * c;
+
+        char *bigger_response = malloc(response_size);
+        memcpy(bigger_response, response, 1000 * (c - 1));
+        free(response);
+
+        response = bigger_response;
+        status = read_from_socket(redis_server_socket_desc, response, 1000 * c, 1000 * (c - 1) - 1);
+    }
 
     parse_response(response, out);
 
     free(response);
 
-    return status_code;
+    return status;
 }

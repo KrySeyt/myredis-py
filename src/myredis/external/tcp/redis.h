@@ -8,6 +8,8 @@
 #define CONNECTION_REFUSED_ERROR -1
 #define COMMAND_SENDING_ERROR -2
 #define UNKNOWN_SERVER_RESPONSE_ERROR -3
+#define SOCKET_CREATION_ERROR -4
+#define BUFFER_IS_FULL -5
 
 int connect_(const char host[], const int port);
 

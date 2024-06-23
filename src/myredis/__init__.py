@@ -3,7 +3,8 @@ __all__ = (
     "AsyncRedis",
     "MyAsyncRedis",
     "CommandSendingError",
-    "UnknownServerResponseError"
+    "UnknownServerResponseError",
+    "SocketCreationError",
 )
 
 import asyncio
@@ -13,7 +14,7 @@ from types import TracebackType
 from typing import Self
 
 import _myredis
-from _myredis import CommandSendingError, UnknownServerResponseError
+from _myredis import CommandSendingError, UnknownServerResponseError, SocketCreationError
 from myasync import Await, IOType, Coroutine
 
 Seconds = float
@@ -111,12 +112,9 @@ class Redis:
         return socket_descriptor
 
     def _get_response(self) -> bytes | None:
-        response = _myredis.get_response(
+        return _myredis.get_response(
             self._redis_server_socket_descriptor,
         )
-
-        assert response is None or isinstance(response, bytes)
-        return response if response else None
 
 
 class MyAsyncRedis:
@@ -227,12 +225,9 @@ class MyAsyncRedis:
     def _get_response(self) -> Coroutine[bytes | None]:
         yield Await(self._redis_server_socket, IOType.INPUT)
 
-        response = _myredis.get_response(
+        return _myredis.get_response(
             self._redis_server_socket.fileno(),
         )
-
-        assert response is None or isinstance(response, bytes)
-        return response if response else None
 
 
 class AsyncRedis:
@@ -361,9 +356,6 @@ class AsyncRedis:
     async def _get_response(self) -> bytes | None:
         await self._wait_event_ready(selectors.EVENT_READ)
 
-        response = _myredis.get_response(
+        return _myredis.get_response(
             self._redis_server_socket.fileno(),
         )
-
-        assert response is None or isinstance(response, bytes)
-        return response if response else None

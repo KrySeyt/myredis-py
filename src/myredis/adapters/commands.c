@@ -8,7 +8,7 @@
 #include <time.h>
 
 int ping_redis() {
-    char command[] = "*1\r\n$4\r\nPING\r\n";
+    const char command[] = "*1\r\n$4\r\nPING\r\n";
     return send_command(command);
 }
 
@@ -43,7 +43,7 @@ int get_redis(const char key[]) {
         key_len,
         key
     );
-    int result = send_command(command);
+    const int result = send_command(command);
     free(command);
     return result;
 }
@@ -90,7 +90,7 @@ int set_redis(const char key[], const char value[], const int lifetime) {
             lifetime
         );
 
-    int result = send_command(command);
+    const int result = send_command(command);
     free(command);
     return result;
 }
@@ -111,7 +111,7 @@ int wait_redis(const int replicas_count, const int timeout) {
         (int) log10(abs(timeout)) + 1,
         timeout
     );
-    int result = send_command(command);
+    const int result = send_command(command);
     free(command);
     return result;
 }
@@ -131,7 +131,7 @@ int config_get_redis(const char key[]) {
         key_len,
         key
     );
-    int result = send_command(command);
+    const int result = send_command(command);
     free(command);
     return result;
 }
