@@ -92,13 +92,7 @@ class Redis:
     def __enter__(self) -> Self:
         return self
 
-    def __exit__(
-            self,
-            exc_type: type[BaseException] | None,
-            exc_val: BaseException | None,
-            exc_tb: TracebackType
-    ) -> None:
-
+    def __exit__(self, *args) -> None:
         self.close()
 
     def _connect(self) -> int:
@@ -203,13 +197,7 @@ class MyAsyncRedis:
     def __enter__(self) -> Self:
         return self
 
-    def __exit__(
-            self,
-            exc_type: type[BaseException] | None,
-            exc_val: BaseException | None,
-            exc_tb: TracebackType
-    ) -> None:
-
+    def __exit__(self, *args) -> None:
         self.close()
 
     def _connect(self) -> int:
@@ -279,20 +267,12 @@ class AsyncRedis:
         return response.decode("utf-8")
 
     async def _wait_event_ready(self, event: int) -> None:
-        wait = True
-        while wait:
+        while True:
             await asyncio.sleep(0)
 
-            r = self._selector.select()
-
-            if not r:
-                continue
-
-            for i in r:
-                selector_key, ready_event = i
-                if ready_event in (event, selectors.EVENT_READ + selectors.EVENT_WRITE):
-                    wait = False
-                    break
+            for key, event in self._selector.select():
+                if event in (event, selectors.EVENT_READ + selectors.EVENT_WRITE):
+                    return
 
     async def ping(self) -> None:
         await self._wait_event_ready(selectors.EVENT_WRITE)
@@ -335,12 +315,7 @@ class AsyncRedis:
     async def __aenter__(self) -> Self:
         return self
 
-    async def __aexit__(
-            self,
-            exc_type: type[BaseException] | None,
-            exc_val: BaseException | None,
-            exc_tb: TracebackType,
-    ) -> None:
+    async def __aexit__(self, *args) -> None:
         await self.close()
 
     def _connect(self) -> int:
