@@ -16,7 +16,7 @@ python -m venv .venv
 
 - Install `myredis-py`
 ```shell
-pip install myasync-py@git+https://github.com/KrySeyt/myredis-py.git
+pip install myredis-py@git+https://github.com/KrySeyt/myredis-py.git
 ```
 
 # Example
